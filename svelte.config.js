@@ -17,7 +17,7 @@ const config = {
 			fallback: '404.html'
 		}),
 		paths: {
-			base: dev ? '' : '/aptos-dictionary-interface'
+			base: dev ? '' : '/aptos-social-network-interface'
 		}
 	}
 };
