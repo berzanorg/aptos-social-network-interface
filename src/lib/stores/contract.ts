@@ -1,4 +1,4 @@
-import { MODULE_ADDRESS } from '$lib/utils/contract';
+import { MODULE_ADDRESS } from '$lib/utils/aptos';
 import { Network, Provider } from 'aptos';
 import { writable } from 'svelte/store';
 
@@ -6,7 +6,7 @@ interface SocialNetworkData {
 	users: Array<User>;
 }
 
-interface User {
+export interface User {
 	addr: string;
 	name: string;
 	bio: string;
@@ -19,12 +19,14 @@ interface Post {
 	image: string;
 	comments: Array<Comment>;
 	like_count: number;
+	time: number;
 }
 
 interface Comment {
 	addr: string;
 	content: string;
 	like_count: number;
+	time: number;
 }
 
 const createContractStore = () => {
@@ -35,6 +37,7 @@ const createContractStore = () => {
 	return {
 		subscribe,
 		fetch: async () => {
+			alert();
 			const provider = new Provider(Network.DEVNET);
 
 			const res = await provider.getAccountResource(
