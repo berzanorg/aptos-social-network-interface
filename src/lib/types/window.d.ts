@@ -19,6 +19,7 @@ interface PetraWallet {
 	onAccountChange: (callback: (account: Account) => void) => void;
 	onNetworkChange: (callback: (network: 'Devnet' | 'Testnet' | 'Mainnet') => void) => void;
 	signAndSubmitTransaction: (tx: Transaction) => Promise<{ hash: string }>;
+	account: () => Promise<Account>;
 }
 
 interface PontemWallet {
@@ -28,4 +29,5 @@ interface PontemWallet {
 	onChangeAccount: (callback: (address?: string) => void) => void;
 	onChangeNetwork: (callback: (network: { chainId: string }) => void) => void;
 	signAndSubmit: (tx: Transaction) => Promise<void>;
+	account: () => Promise<string>;
 }
