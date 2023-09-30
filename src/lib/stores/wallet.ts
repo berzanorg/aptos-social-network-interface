@@ -1,7 +1,7 @@
 import { Errors } from '$lib/utils/errors';
 import { writable } from 'svelte/store';
 import { Network, Provider } from 'aptos';
-import { MODULE_ADDRESS } from '$lib/utils/contract';
+import { MODULE_ADDRESS, provider } from '$lib/utils/aptos';
 import { contract } from './contract';
 
 interface WalletStore {
@@ -18,75 +18,64 @@ const createWalletStore = () => {
 	});
 
 	async function sendTx(tx: Transaction): Promise<boolean> {
-		if (window.aptos) {
+		if (!window.aptos) return false;
+
+		try {
 			const { hash } = await window.aptos.signAndSubmitTransaction(tx);
+
+			await provider.waitForTransaction(hash);
 			return true;
-		} else if (window.pontem) {
-			const res = await window.pontem.signAndSubmit(tx);
-			console.log(res);
-			return true;
-		} else {
-			alert(Errors.AnyWalletNotFound);
+		} catch {
 			return false;
 		}
 	}
 
 	return {
 		subscribe,
+		connectIfGranted: async () => {
+			if (!window.aptos) return;
+
+			const account = await window.aptos.account();
+			const network = await window.aptos.network();
+
+			if (!account.address) return;
+
+			set({
+				isConnected: true,
+				isDevnet: network === 'Devnet',
+				address: account.address
+			});
+		},
 		connect: async () => {
+			if (!window.aptos) return alert(Errors.AnyWalletNotFound);
 			try {
-				if (window.aptos) {
-					const account = await window.aptos.connect();
-					const network = await window.aptos.network();
+				const account = await window.aptos.connect();
+				const network = await window.aptos.network();
 
-					if (!account.address) return;
+				if (!account.address) return;
 
-					set({
-						isConnected: true,
-						isDevnet: network === 'Devnet',
-						address: account.address
-					});
-				} else if (window.pontem) {
-					const account = await window.pontem.connect();
-					const network = await window.pontem.network();
-
-					if (!account.address) return;
-
-					set({
-						isConnected: true,
-						isDevnet: network.chainId === '81',
-						address: account.address
-					});
-				} else {
-					return alert(Errors.AnyWalletNotFound);
-				}
+				set({
+					isConnected: true,
+					isDevnet: network === 'Devnet',
+					address: account.address
+				});
 			} catch {}
 		},
 		disconnect: async () => {
+			if (!window.aptos) return alert(Errors.AnyWalletNotFound);
 			try {
-				if (window.aptos) {
-					await window.aptos.disconnect();
+				await window.aptos.disconnect();
 
-					set({
-						isConnected: false,
-						isDevnet: false,
-						address: undefined
-					});
-				} else if (window.pontem) {
-					await window.pontem.disconnect();
-
-					set({
-						isConnected: false,
-						isDevnet: false,
-						address: undefined
-					});
-				} else {
-					return alert(Errors.AnyWalletNotFound);
-				}
+				set({
+					isConnected: false,
+					isDevnet: false,
+					address: undefined
+				});
 			} catch {}
 		},
 		listenEvents: () => {
-			if (window.aptos) {
+			if (!window.aptos) return alert(Errors.AnyWalletNotFound);
+			try {
 				window.aptos.onAccountChange(({ address }) => {
 					update((state) => ({
 						...state,
@@ -100,23 +89,7 @@ const createWalletStore = () => {
 						isDevnet: network === 'Devnet'
 					}));
 				});
-			} else if (window.pontem) {
-				window.pontem.onChangeAccount((address) => {
-					update((state) => ({
-						...state,
-						address
-					}));
-				});
-
-				window.pontem.onChangeNetwork(({ chainId }) => {
-					update((state) => ({
-						...state,
-						isDevnet: chainId === '81'
-					}));
-				});
-			} else {
-				return alert(Errors.AnyWalletNotFound);
-			}
+			} catch {}
 		},
 		createUserProfile: async (params: { name: string; bio: string; pfp: string }) => {
 			const tx: Transaction = {
@@ -176,12 +149,12 @@ const createWalletStore = () => {
 				await contract.fetch();
 			}
 		},
-		makeComment: async (params: { postOwnerAddr: string; postIndex: number; comment: string }) => {
+		makeComment: async (params: { postOwnerAddr: string; postIndex: number; content: string }) => {
 			const tx: Transaction = {
 				function: `${MODULE_ADDRESS}::social_network::make_comment`,
 				type: 'entry_function_payload',
 				type_arguments: [],
-				arguments: [params.postOwnerAddr, params.postIndex.toString(), params.comment]
+				arguments: [params.postOwnerAddr, params.postIndex.toString(), params.content]
 			};
 
 			const isOk = await sendTx(tx);
