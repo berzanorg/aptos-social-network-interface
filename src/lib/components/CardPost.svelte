@@ -25,8 +25,6 @@
 			postIndex: post.index
 		});
 	};
-
-	$: console.log(post.image);
 </script>
 
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->

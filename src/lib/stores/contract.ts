@@ -37,7 +37,6 @@ const createContractStore = () => {
 	return {
 		subscribe,
 		fetch: async () => {
-			alert();
 			const provider = new Provider(Network.DEVNET);
 
 			const res = await provider.getAccountResource(
