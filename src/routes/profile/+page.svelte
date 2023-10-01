@@ -52,6 +52,10 @@
 	};
 </script>
 
+<svelte:head>
+	<title>Aptos Social Network | Profile</title>
+</svelte:head>
+
 <Main
 	>{#if $wallet.isConnected}
 		<div class="flex flex-col px-4 sm:px-6 py-5 gap-12 border-b border-neutral-800">

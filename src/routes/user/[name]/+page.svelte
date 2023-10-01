@@ -25,6 +25,10 @@
 			.sort((a, b) => b.time - a.time) || [];
 </script>
 
+<svelte:head>
+	<title>Aptos Social Network {profile && ` | ${profile.name}`}</title>
+</svelte:head>
+
 <!-- svelte-ignore a11y-img-redundant-alt -->
 
 <Main>

@@ -26,6 +26,10 @@
 		.sort((a, b) => b.time - a.time);
 </script>
 
+<svelte:head>
+	<title>Aptos Social Network</title>
+</svelte:head>
+
 <Main>
 	{#if $wallet.isConnected}
 		{#if user}
