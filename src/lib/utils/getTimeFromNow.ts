@@ -14,6 +14,6 @@ export function getTimeFromNow(timestampAsSec: number) {
 	} else if (mins < 60) {
 		return `${mins} mins ago`;
 	} else {
-		return `${mins / 60} hours ago`;
+		return `${Math.round(mins / 60)} hours ago`;
 	}
 }
